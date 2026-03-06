@@ -1,0 +1,22 @@
+﻿@model VistaDepartamento
+<h1>Paginacion individual</h1>
+<h3 style="color:blue">Registros @Model.Posicion de @ViewData["ULTIMO"]</h3>
+<div>
+    <ul class="list-group">
+        <li class="list-group-item"><a asp-controller="Paginacion" 
+            asp-action="RegistroVistaDepartamento" asp-route-posicion="1">Primero</a></li>
+        <li class="list-group-item">
+            <a asp-controller="Paginacion"
+               asp-action="RegistroVistaDepartamento" asp-route-posicion="@ViewData["ANTERIOR"]">Anterior</a>
+        </li>
+        <li class="list-group-item">
+            <a asp-controller="Paginacion"
+               asp-action="RegistroVistaDepartamento" asp-route-posicion="@ViewData["SIGUIENTE"]">Siguiente</a>
+        </li>
+    </ul>
+</div>
+<ul class="list-group">
+    <li class="list-group-item">Numero: @Model.IdDepartamento</li>
+    <li class="list-group-item">Nombre: @Model.Nombre</li>
+    <li class="list-group-item">Localidad: @Model.Localidad</li>
+</ul>
