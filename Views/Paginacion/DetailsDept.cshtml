@@ -1,0 +1,65 @@
+﻿@model Empleado
+@{
+    Departamento dept = (Departamento)ViewData["DEPARTAMENTO"];
+    int numRegistros = (int)ViewData["REGISTROS"];
+    int posicion = (int)ViewData["POSICION"];
+}
+
+<h1>Detalles dept</h1>
+
+<ul class="list-group">
+    <li class="list-group-item">
+        <strong>Id: </strong> @dept.IdDepartamento
+    </li>
+    <li class="list-group-item">
+        <strong>Nombre: </strong> @dept.Nombre
+    </li>
+    <li class="list-group-item">
+        <strong>Localidad: </strong> @dept.Localidad
+    </li>
+</ul>
+<hr/>
+@if (Model != null)
+{
+<h1>Registro @posicion de @numRegistros</h1>
+<div>
+    <ul class="list-group-horizontal">
+        <li class="list-group-item">
+            <a asp-controller="Paginacion" asp-action="DetailsDept" asp-route-iddept="@dept.IdDepartamento" asp-route-posicion="1">Primero</a>
+        </li>
+        <li class="list-group-item">
+            <a asp-controller="Paginacion" asp-action="DetailsDept" asp-route-iddept="@dept.IdDepartamento" asp-route-posicion="@ViewData["ANTERIOR"]">Anterior</a>
+        </li>
+        <li class="list-group-item">
+            <a asp-controller="Paginacion" asp-action="DetailsDept" asp-route-iddept="@dept.IdDepartamento" asp-route-posicion="@ViewData["SIGUIENTE"]">Siguiente</a>
+        </li>
+        <li class="list-group-item">
+            <a asp-controller="Paginacion" asp-action="DetailsDept" asp-route-iddept="@dept.IdDepartamento" asp-route-posicion="@ViewData["ULTIMO"]">Último</a>
+        </li>
+    </ul>
+</div>
+
+<h2>Empleados del departamento</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>IdEmpleado</th>
+            <th>Apellido</th>
+            <th>Oficio</th>
+            <th>Salario</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@Model.IdEmpleado</td>
+            <td>@Model.Apellido</td>
+            <td>@Model.Oficio</td>
+            <td>@Model.Salario</td>
+        </tr>
+    </tbody>
+</table>
+}
+else
+{
+    <h2>No hay empleados</h2>
+}

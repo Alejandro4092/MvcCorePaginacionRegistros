@@ -1,9 +1,6 @@
 ﻿using System.Data;
-using System.Diagnostics.Metrics;
-using System.Reflection.Metadata;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using MvcCorePaginacionRegistros.Data;
 using MvcCorePaginacionRegistros.Models;
 
@@ -39,18 +36,43 @@ as
     from V_GRUPO_EMPLEADOS
     where POSICION >= @posicion and POSICION < (@posicion + 3)
 go
+
+create procedure SP_GRUPO_EMPLEADOS_OFICIO(@posicion int, @oficio nvarchar(50), @registros int out)
+--Almacenados el numero de registros filtrados
+as
+select @registros= COUNT(EMP_NO) from EMP
+where OFICIO=@oficio
+select EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO from (select cast(ROW_NUMBER()over (order by APELLIDO)as int) as
+POSICION, EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO
+FROM EMP
+Where OFICIO=@oficio)QUERY
+where (QUERY.POSICION>=@posicion AND QUERY.POSICION<(@posicion+3))
+go
+
+-- NUEVO STORED PROCEDURE
+CREATE PROCEDURE SP_EMPLEADO_DEPT_POSICION
+(
+    @iddept INT,
+    @posicion INT
+)
+AS
+BEGIN
+    SELECT EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO
+    FROM (
+        SELECT
+            CAST(ROW_NUMBER() OVER (ORDER BY EMP_NO) AS INT) AS POSICION,
+            EMP_NO,
+            APELLIDO,
+            OFICIO,
+            SALARIO,
+            DEPT_NO
+        FROM EMP
+        WHERE DEPT_NO = @iddept
+    ) AS QUERY
+    WHERE QUERY.POSICION = @posicion
+END
+GO
 */
-//create procedure SP_GRUPO_EMPLEADOS_OFICIO(@posicion int, @oficio nvarchar(50), @registros int out)
-//--Almacenados el numero de registros filtrados
-//as
-//select @registros= COUNT(EMP_NO) from EMP
-//where OFICIO=@oficio
-//select EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO from (select cast(ROW_NUMBER()over (order by APELLIDO)as int) as
-//POSICION, EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO
-//FROM EMP
-//Where OFICIO=@oficio)QUERY
-//where (QUERY.POSICION>=1 AND QUERY.POSICION<(1+3))
-//go
 #endregion
 
 namespace MvcCorePaginacionRegistros.Repositories
@@ -128,20 +150,55 @@ namespace MvcCorePaginacionRegistros.Repositories
             int posicion
         )
         {
-            string sql = "SP_GRUPO_EMPLEADOS_OFICIO @posicion, @oficio, @registros out";
+            string sql = "SP_GRUPO_EMPLEADOS_OFICIO @posicion, @oficio, @registros out";
             SqlParameter pamPos = new SqlParameter("@posicion", posicion);
             SqlParameter pamOfi = new SqlParameter("@oficio", oficio);
             SqlParameter pamReg = new SqlParameter("@registros", 0);
             pamReg.Direction = ParameterDirection.Output;
-
             pamReg.DbType = DbType.Int32;
 
             var consulta = this.context.Empleados.FromSqlRaw(sql, pamPos, pamOfi, pamReg);
             List<Empleado> empleados = await consulta.ToListAsync();
-            //HASTA QUE NO HEMOS EXTRAIDO LOS DATOS (Empleados)
-            //NO SE LIBERAN LOS PARAMETROS DE SALIDA
+            //HASTA QUE NO HEMOS EXTRAIDO LOS DATOS (Empleados)
+            //NO SE LIBERAN LOS PARAMETROS DE SALIDA
             int registros = (int)pamReg.Value;
             return new ModelEmpleadosOficio { Empleados = empleados, NumeroRegistros = registros };
+        }
+
+        // MÉTODOS NUEVOS CON NOMBRES UNIFICADOS
+        public async Task<List<Departamento>> GetDepartamentosAsync()
+        {
+            return await this.context.Departamentos.ToListAsync();
+        }
+
+        public async Task<Departamento> FindDepartamentoAsync(int id)
+        {
+            return await this
+                .context.Departamentos.Where(z => z.IdDepartamento == id)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Empleado>> GetEmpleadosDeptAsync(int iddept)
+        {
+            return await this
+                .context.Empleados.Where(z => z.IdDepartamento == iddept)
+                .OrderBy(e => e.IdEmpleado)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetNumeroEmpleadosDeptAsync(int iddept)
+        {
+            return await this.context.Empleados.Where(z => z.IdDepartamento == iddept).CountAsync();
+        }
+
+        public async Task<Empleado> GetEmpleadoDeptPosicionAsync(int iddept, int posicion)
+        {
+            string sql = "SP_EMPLEADO_DEPT_POSICION @iddept, @posicion";
+            SqlParameter pamDept = new SqlParameter("@iddept", iddept);
+            SqlParameter pamPos = new SqlParameter("@posicion", posicion);
+
+            var consulta = this.context.Empleados.FromSqlRaw(sql, pamDept, pamPos);
+            return await consulta.FirstOrDefaultAsync();
         }
     }
 }

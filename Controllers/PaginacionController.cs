@@ -146,5 +146,87 @@ namespace MvcCorePaginacionRegistros.Controllers
             ViewData["OFICIO"] = oficio;
             return View(model.Empleados);
         }
+
+        //public async Task<IActionResult> DetailsDept(int iddept, int? posicion)
+        //{
+        //    Departamento dept = await this.repo.FindDepartamentoAsync(iddept);
+        //    ViewData["DEPARTAMENTO"] = dept;
+
+        //    if (posicion == null)
+        //    {
+        //        posicion = 1;
+        //    }
+        //    int numRegistros = await this.repo.GetNumeroEmpleadosDeptAsync(iddept);
+        //    ViewData["REGISTROS"] = numRegistros;
+        //    int siguiente = posicion.Value + 1;
+        //    if (siguiente > numRegistros)
+        //    {
+        //        siguiente = numRegistros;
+        //    }
+        //    int anterior = posicion.Value - 1;
+        //    if (anterior < 1)
+        //    {
+        //        anterior = 1;
+        //    }
+        //    ViewData["ULTIMO"] = numRegistros;
+        //    ViewData["SIGUIENTE"] = siguiente;
+        //    ViewData["ANTERIOR"] = anterior;
+        //    ViewData["POSICION"] = posicion.Value;
+        //    List<Empleado> empleados = await this.repo.GetEmpleadosDeptAsync(iddept);
+        //    if (empleados.Count == 0)
+        //    {
+        //        return View();
+        //    }
+        //    Empleado empleado = empleados[posicion.Value - 1];
+        //    return View(empleado);
+        //}
+        public async Task<IActionResult> DetailsDept(int iddept, int? posicion)
+        {
+            Departamento dept = await this.repo.FindDepartamentoAsync(iddept);
+            ViewData["DEPARTAMENTO"] = dept;
+
+            if (posicion == null)
+            {
+                posicion = 1;
+            }
+
+            int numRegistros = await this.repo.GetNumeroEmpleadosDeptAsync(iddept);
+
+            // Validaciones
+            if (posicion.Value > numRegistros)
+            {
+                posicion = numRegistros;
+            }
+            if (posicion.Value < 1)
+            {
+                posicion = 1;
+            }
+
+            ViewData["REGISTROS"] = numRegistros;
+
+            int siguiente = posicion.Value + 1;
+            if (siguiente > numRegistros)
+            {
+                siguiente = numRegistros;
+            }
+
+            int anterior = posicion.Value - 1;
+            if (anterior < 1)
+            {
+                anterior = 1;
+            }
+
+            ViewData["ULTIMO"] = numRegistros;
+            ViewData["SIGUIENTE"] = siguiente;
+            ViewData["ANTERIOR"] = anterior;
+            ViewData["POSICION"] = posicion.Value;
+
+            Empleado empleado = await this.repo.GetEmpleadoDeptPosicionAsync(
+                iddept,
+                posicion.Value
+            );
+
+            return View(empleado);
+        }
     }
 }
