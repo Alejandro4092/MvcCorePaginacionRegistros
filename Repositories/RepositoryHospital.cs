@@ -37,18 +37,21 @@ as
     where POSICION >= @posicion and POSICION < (@posicion + 3)
 go
 
-create procedure SP_GRUPO_EMPLEADOS_OFICIO(@posicion int, @oficio nvarchar(50), @registros int out)
---Almacenados el numero de registros filtrados
-as
-select @registros= COUNT(EMP_NO) from EMP
-where OFICIO=@oficio
-select EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO from (select cast(ROW_NUMBER()over (order by APELLIDO)as int) as
-POSICION, EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO
-FROM EMP
-Where OFICIO=@oficio)QUERY
-where (QUERY.POSICION>=@posicion AND QUERY.POSICION<(@posicion+3))
-go
-
+create procedure SP_GRUPO_EMPLEADOS_OFICIO 
+(@posicion int, @oficio nvarchar(50) 
+, @registros int out) as 
+--ALMACENAMOS EL NUMERO DE REGISTROS FILTRADOS 
+select @registros = count(EMP_NO) from EMP 
+where OFICIO=@oficio 
+select EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO 
+from  
+(select cast(row_number() over (order by APELLIDO) as int) 
+as POSICION, EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO 
+from EMP 
+where OFICIO=@oficio) QUERY 
+where (QUERY.POSICION >= @posicion  
+and QUERY.POSICION < (@posicion + 3)) 
+go 
 -- STORED PROCEDURE CON PARÁMETRO DE SALIDA
 CREATE PROCEDURE SP_EMPLEADO_DEPT_POSICION
 (
@@ -210,7 +213,9 @@ namespace MvcCorePaginacionRegistros.Repositories
             pamReg.DbType = DbType.Int32;
 
             var consulta = this.context.Empleados.FromSqlRaw(sql, pamDept, pamPos, pamReg);
-            Empleado empleado = await consulta.FirstOrDefaultAsync();
+            // Materializar primero con ToListAsync(), luego aplicar FirstOrDefault en memoria
+            var empleados = await consulta.ToListAsync();
+            Empleado empleado = empleados.FirstOrDefault();
 
             // Extraer el total de registros del parámetro de salida
             int totalRegistros = (int)pamReg.Value;
