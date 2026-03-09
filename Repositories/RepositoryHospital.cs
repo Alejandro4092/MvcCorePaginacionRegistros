@@ -49,14 +49,19 @@ Where OFICIO=@oficio)QUERY
 where (QUERY.POSICION>=@posicion AND QUERY.POSICION<(@posicion+3))
 go
 
--- NUEVO STORED PROCEDURE
+-- STORED PROCEDURE CON PARÁMETRO DE SALIDA
 CREATE PROCEDURE SP_EMPLEADO_DEPT_POSICION
 (
     @iddept INT,
-    @posicion INT
+    @posicion INT,
+    @registros INT OUTPUT
 )
 AS
 BEGIN
+    SELECT @registros = COUNT(*)
+    FROM EMP
+    WHERE DEPT_NO = @iddept;
+
     SELECT EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO
     FROM (
         SELECT
@@ -69,7 +74,7 @@ BEGIN
         FROM EMP
         WHERE DEPT_NO = @iddept
     ) AS QUERY
-    WHERE QUERY.POSICION = @posicion
+    WHERE QUERY.POSICION = @posicion;
 END
 GO
 */
@@ -191,14 +196,26 @@ namespace MvcCorePaginacionRegistros.Repositories
             return await this.context.Empleados.Where(z => z.IdDepartamento == iddept).CountAsync();
         }
 
-        public async Task<Empleado> GetEmpleadoDeptPosicionAsync(int iddept, int posicion)
+        // MÉTODO MEJORADO QUE DEVUELVE EMPLEADO Y TOTAL EN UNA SOLA LLAMADA
+        public async Task<(
+            Empleado empleado,
+            int totalRegistros
+        )> GetEmpleadoDeptPosicionConTotalAsync(int iddept, int posicion)
         {
-            string sql = "SP_EMPLEADO_DEPT_POSICION @iddept, @posicion";
+            string sql = "SP_EMPLEADO_DEPT_POSICION @iddept, @posicion, @registros out";
             SqlParameter pamDept = new SqlParameter("@iddept", iddept);
             SqlParameter pamPos = new SqlParameter("@posicion", posicion);
+            SqlParameter pamReg = new SqlParameter("@registros", 0);
+            pamReg.Direction = ParameterDirection.Output;
+            pamReg.DbType = DbType.Int32;
 
-            var consulta = this.context.Empleados.FromSqlRaw(sql, pamDept, pamPos);
-            return await consulta.FirstOrDefaultAsync();
+            var consulta = this.context.Empleados.FromSqlRaw(sql, pamDept, pamPos, pamReg);
+            Empleado empleado = await consulta.FirstOrDefaultAsync();
+
+            // Extraer el total de registros del parámetro de salida
+            int totalRegistros = (int)pamReg.Value;
+
+            return (empleado, totalRegistros);
         }
     }
 }

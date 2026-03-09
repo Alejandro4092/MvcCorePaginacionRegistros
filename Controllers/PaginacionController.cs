@@ -190,7 +190,11 @@ namespace MvcCorePaginacionRegistros.Controllers
                 posicion = 1;
             }
 
-            int numRegistros = await this.repo.GetNumeroEmpleadosDeptAsync(iddept);
+            // UNA SOLA LLAMADA QUE DEVUELVE EMPLEADO Y TOTAL
+            var (empleado, numRegistros) = await this.repo.GetEmpleadoDeptPosicionConTotalAsync(
+                iddept,
+                posicion.Value
+            );
 
             // Validaciones
             if (posicion.Value > numRegistros)
@@ -220,11 +224,6 @@ namespace MvcCorePaginacionRegistros.Controllers
             ViewData["SIGUIENTE"] = siguiente;
             ViewData["ANTERIOR"] = anterior;
             ViewData["POSICION"] = posicion.Value;
-
-            Empleado empleado = await this.repo.GetEmpleadoDeptPosicionAsync(
-                iddept,
-                posicion.Value
-            );
 
             return View(empleado);
         }
