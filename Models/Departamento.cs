@@ -10,14 +10,10 @@ namespace MvcCorePaginacionRegistros.Models
         [Column("DEPT_NO")]
         public int IdDepartamento { get; set; }
 
-        [Required]
-        [StringLength(100)]
         [Column("DNOMBRE")]
         public string Nombre { get; set; }
 
         [Column("LOC")]
-        public string? Localidad { get; set; }
-
-        public ICollection<Empleado>? Empleados { get; set; }
+        public string Localidad { get; set; }
     }
 }

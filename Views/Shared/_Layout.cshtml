@@ -13,7 +13,9 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MvcCorePaginacionRegistros</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/peter.png" style="width:60px" />
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -26,11 +28,54 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Paginacion" asp-action="RegistroVistaDepartamento">Registro a registro</a>
-                        </li>
-                            <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Paginacion" asp-action="GrupoVistaDepartamentos">Registro en grupo</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Paginación
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Paginacion"
+                                       asp-action="RegistroVistaDepartamento">
+                                        Registro a registro
+                                    </a>
+                                </li>
+                                <li class="dropdown-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Paginacion"
+                                       asp-action="GrupoVistaDepartamentos">
+                                        Paginación grupo
+                                    </a>
+                                </li>
+                                <li class="dropdown-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Paginacion"
+                                       asp-action="GrupoDepartamentos">
+                                        Paginación Departamentos
+                                    </a>
+                                </li>
+                                <li class="dropdown-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Paginacion"
+                                       asp-action="PaginarGrupoEmpleados">
+                                        Paginación Empleados
+                                    </a>
+                                </li>
+                                <li class="dropdown-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Paginacion"
+                                       asp-action="EmpleadosOficio">
+                                        Empleados Oficio
+                                    </a>
+                                </li>
+                                <li class="dropdown-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Paginacion"
+                                       asp-action="EmpleadosOficioOut">
+                                        Empleados Oficio out
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
